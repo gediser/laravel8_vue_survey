@@ -35,7 +35,7 @@ const tmpSurveys = [
                 type: "checkbox",
                 question: "Which language videos do you want to see on my channel?",
                 description:"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries,",
-                date:{
+                data:{
                     options:[
                         {uuid: "6312ac1a-a899-43e1-a9cc-107ff7eab78c", text: "Javascript"},
                         {uuid: "d4a1b82a-df44-46b1-b175-9fc236bcbc7a", text: "PHP"},
@@ -154,9 +154,28 @@ const store = createStore({
             token: sessionStorage.getItem('TOKEN'),
         },
         surveys: [...tmpSurveys],
+        questionTypes: ["text", "select", "radio", "checkbox", "textarea"],
     },
     getters: {},
     actions: {
+        saveSurvey({ commit }, survey){
+            let response;
+            if (survey.id){
+                response = axiosClient
+                            .put(`/survey/${survey.id}`, survey)
+                            .then((res) => {
+                                commit("updateSurvey", res.data);
+                                return res;
+                            });
+            }else {
+                response = axiosClient
+                            .post("/survey", survey).then((res) => {
+                                commit("saveSurvey", res.data);
+                                return res;
+                            });
+            }
+            return response;
+        },
         register({ commit }, user){
             return axiosClient.post('/register', user)
                 .then(({data}) => {
@@ -178,8 +197,20 @@ const store = createStore({
                     return response;
                 })
         },
+        
     },
     mutations: {
+        saveSurvey: (state, survey) => {
+            state.surveys=[...state.surveys, survey.data];
+        },
+        updateSurvey: (state, survey) => {
+            state.surveys = state.surveys.map((s) => {
+                if (s.id == survey.data.id) {
+                    return survey.data;
+                }
+                return s;
+            })
+        },
         logout : (state) => {
             state.user.data = {};
             state.user.token = null;

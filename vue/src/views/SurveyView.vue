@@ -166,10 +166,13 @@
 
 <script setup>
     import {ref} from "vue"
+    import {v4 as uuidv4} from "uuid"
     import store from "../store"
-    import {useRoute} from "vue-router"
+    import {useRoute, useRouter} from "vue-router"
     import PageComponent from '../components/PageComponent.vue'
     import QuestionEditor from '../components/editor/QuestionEditor.vue'
+
+    const router = useRouter();
 
     const route = useRoute();
 
@@ -187,6 +190,45 @@
         model.value = store.state.surveys.find(
             (s) => s.id === parseInt(route.params.id)
         )
+    }
+
+    function addQuestion(index){
+        const newQuestion = {
+            id: uuidv4(),
+            type: "text",
+            question: "",
+            description: null,
+            data:{},
+        }
+
+        model.value.questions.splice(index, 0, newQuestion);
+    }
+
+    function deleteQuestion(question){
+        model.value.questions = model.value.questions.filter(
+            (q) => q.id !== question.id
+        );
+    }
+
+    function questionChange(question){
+        model.value.questions = model.value.questions.map((q) => {
+            if (q.id === question.id){
+                return JSON.parse(JSON.stringify(question))
+            }
+            return q
+        })
+    }
+
+    /**
+     * Create or Update survey
+     */
+    function saveSurvey(){
+        store.dispatch("saveSurvey", model.value).then(({ data }) => {
+            router.push({
+                name: "SurveyView",
+                params: { id: data.data.id}
+            })
+        });
     }
 </script>
 
