@@ -33,7 +33,7 @@ const routes = [
                 component: SurveyView
             },
             { 
-                path: '/surveys:id',
+                path: '/surveys/:id',
                 name: 'SurveyView',
                 component: SurveyView
             }

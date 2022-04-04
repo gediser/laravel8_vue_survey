@@ -18,8 +18,8 @@
                         </label>
                         <div class="mt-1 flex items-center">
                             <img 
-                                v-if="model.image"
-                                :src="model.image"
+                                v-if="model.image_url"
+                                :src="model.image_url"
                                 :alt="model.title"
                                 class="w-64 h-48 object-cover"
                             />
@@ -38,6 +38,7 @@
                             >   
                                 <input 
                                     type="file"
+                                    @change="onImageChoose"
                                     class="absolute left-0 top-0 right-0 bottom-0 opacity-0 cursor-pointer"
                                 />
                                 Change
@@ -165,7 +166,7 @@
 </template>
 
 <script setup>
-    import {ref} from "vue"
+    import {ref, watch} from "vue"
     import {v4 as uuidv4} from "uuid"
     import store from "../store"
     import {useRoute, useRouter} from "vue-router"
@@ -181,15 +182,39 @@
         title: "",
         status: false,
         description: null,
-        image: null,
+        image_url: null,
         expire_date: null,
         questions: []
     })
 
+    // watch to current survey data change and when this happen we update local
+    watch(
+        () => store.state.currentSurvey.data,
+        (newVal, oldVal) =>{
+            model.value = {
+                ...JSON.parse(JSON.stringify(newVal)),
+                status: newVal.status !== 'draft',
+
+            }
+        }
+    );
+
     if (route.params.id){
-        model.value = store.state.surveys.find(
-            (s) => s.id === parseInt(route.params.id)
-        )
+       store.dispatch('getSurvey', route.params.id);
+    }
+
+    function onImageChoose(ev){
+        const file = ev.target.files[0];
+
+        const reader = new FileReader();
+        reader.onload = () =>{
+            // The field to send on backend and apply validations
+            model.value.image = reader.result;
+
+            // The field to display here
+            model.value.image_url = reader.result;
+        }
+        reader.readAsDataURL(file);
     }
 
     function addQuestion(index){
