@@ -21,7 +21,7 @@
         </template>
         <div v-if="surveyLoading" class="flex justify-center">Loding...</div>
         
-        <form v-else @submit.prevent="saveSurvey">
+        <form v-else @submit.prevent="saveSurvey" class="animate-fade-in-down">
             <div class="shadow sm:rounded-md sm:overflow-hidden">
                 <!-- Survey Fields -->
                 <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
@@ -265,6 +265,11 @@
      */
     function saveSurvey(){
         store.dispatch("saveSurvey", model.value).then(({ data }) => {
+            console.log("notify me")
+            store.commit('notify', {
+                type: 'success',
+                message: 'Survey was successfully updated'
+            })
             router.push({
                 name: "SurveyView",
                 params: { id: data.data.id}
