@@ -20,6 +20,14 @@
                 <div class="text-xl mb-3 font-semibold">
                     Thank you for participating in this survey.
                 </div>
+                <button
+                    @click="submitAnotherResponse"
+                    type="button"
+                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white
+                            bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" 
+                >
+                    Submit another response
+                </button>
             </div>
 
             <div>
@@ -42,7 +50,28 @@
 </template>
 
 <script setup>
+    import QuestionViewer from "../components/viewer/QuestionViewer.vue";
+    import { computed, ref } from "vue";
+    import {useRoute} from "vue-router";
+    import {useStore} from "vuex";
 
+    const route = useRoute();
+
+    const store = useStore();
+
+    const loading = computed(() => store.state.currentSurvey.loading);
+    const survey = computed(() => store.state.currentSurvey.data);
+
+    const surveyFinished = ref(false);
+
+    const answers = ref({});
+
+    store.dispatch("getSurveyBySlug", route.params.slug);
+
+    function submitSurvey(){
+        console.log(JSON.stringify(answers.value, undefined, 2));
+        store.dispatch("saveSurveyAnswer", {});
+    }
 </script>
 
 <style scoped>
