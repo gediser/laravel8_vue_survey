@@ -30,7 +30,7 @@
                 </button>
             </div>
 
-            <div>
+            <div v-else>
                 <hr class="my-3" />
                 <div v-for="(question, ind) of survey.questions" :key="question.id">
                     <QuestionViewer 
@@ -70,7 +70,25 @@
 
     function submitSurvey(){
         console.log(JSON.stringify(answers.value, undefined, 2));
-        store.dispatch("saveSurveyAnswer", {});
+        store.dispatch("saveSurveyAnswer", {
+            surveyId: survey.value.id,
+            answers: answers.value,
+        })
+        .then((response) => {
+            console.log("save survey okay")
+            if (response.status === 201){
+                console.log("surveyFinished")
+                surveyFinished.value = true;
+            }
+        })
+        .catch((err) => {
+            console.log("save survey error")
+        });
+    }
+
+    function  submitAnotherResponse(){
+        answers.value = {};
+        surveyFinished.value = false;
     }
 </script>
 

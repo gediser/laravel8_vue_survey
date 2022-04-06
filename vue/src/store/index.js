@@ -1,3 +1,4 @@
+import axios from "axios";
 import {createStore} from "vuex";
 import axiosClient from '../axios'
 
@@ -71,6 +72,22 @@ const store = createStore({
                         commit('setSurveys', res.data)
                         return res;
                     })
+        },
+        getSurveyBySlug({commit}, slug){
+            commit("setCurrentSurveyLoading", true);
+            return axiosClient.get(`/survey-by-slug/${slug}`)
+                        .then((res) => {
+                            commit("setCurrentSurvey", res.data);
+                            commit("setCurrentSurveyLoading", false);
+                            return res;
+                        })
+                        .catch((err) => {
+                            commit("setCurrentSurveyLoading", false)
+                            throw err;
+                        })
+        },
+        saveSurveyAnswer({commit}, {surveyId, answers}){
+            return axiosClient.post(`/survey/${surveyId}/answer`, {answers})
         },
         register({ commit }, user){
             return axiosClient.post('/register', user)
