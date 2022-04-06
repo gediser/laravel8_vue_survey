@@ -10,6 +10,16 @@
         </p>
       </div>
       <form class="mt-8 space-y-6" @submit="register">
+        <Alert
+          v-if="Object.keys(errors).length"
+          class="flex-col items-stretch text-sm"
+        >
+          <div v-for="(field, i) of Object.keys(errors)" :key="i">
+            <div v-for="(error, ind) of errors[field] ||  []" :key="ind">
+              * {{ error }}
+            </div>
+          </div>
+        </Alert>
         <input type="hidden" name="remember" value="true" />
         <div class="rounded-md shadow-sm -space-y-px">
           <div>
@@ -46,6 +56,8 @@
 import { LockClosedIcon } from '@heroicons/vue/solid'
 import store from "../store"
 import {useRouter} from "vue-router"
+import {ref} from "vue"
+import Alert from "../components/Alert.vue"
 
 const router = useRouter();
 
@@ -54,7 +66,9 @@ const user = {
   email: '',
   password: '',
   password_confirmation: ''
-}
+};
+
+let errors = ref({});
 
 function register(ev){
   ev.preventDefault();
@@ -64,6 +78,10 @@ function register(ev){
       router.push({
         name: 'Dashboard'
       })
+    }).catch((err)=>{
+      if (err.response.status === 422){
+        errors.value = err.response.data.errors
+      }
     })
 }
 
